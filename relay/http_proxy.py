@@ -226,6 +226,23 @@ async def _forward_request_impl(
         and k.lower() != "content-encoding"
         and k.lower() != "content-length"
     ]
+    # Starlette's Response.headers expects a dict[str, str] (it calls .items()
+    # then .encode() on each value). Multi-value headers are joined with ", "
+    # per RFC 7230 §3.2.2 (e.g. "Set-Cookie" should ideally remain separate,
+    # but for the common case a single comma-joined value works).
+    headers_dict: dict[str, str] = {}
+    multi: dict[str, list[str]] = {}
+    for name, value in flat:
+        lname = name.lower()
+        if lname in headers_dict:
+            # Already have one value → switch to multi mode.
+            multi.setdefault(lname, [headers_dict[lname]]).append(value)
+            headers_dict[lname] = ", ".join(multi[lname])
+        elif lname in multi:
+            multi[lname].append(value)
+            headers_dict[lname] = ", ".join(multi[lname])
+        else:
+            headers_dict[lname] = value
     body_out: bytes = result.get("body") or b""
     logger.info(
         "Tunnel %s: %s %s → %d (%d bytes)",
@@ -238,7 +255,7 @@ async def _forward_request_impl(
     return Response(
         content=body_out,
         status_code=status_code,
-        headers=flat,
+        headers=headers_dict,
         media_type=None,
     )
 
