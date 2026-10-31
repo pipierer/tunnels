@@ -1,14 +1,15 @@
 BenTunnel v1.0.0
 
-Build : 4
+Build : 6
 Date  : 2026-10-31
 Python: 3.10+ (testé sur 3.12 et 3.14)
 
 Changelog :
   - v1.0.0 (build 1) : version initiale (pydantic 2.10.4 — casse sur Python 3.14)
   - v1.0.0 (build 2) : pydantic 2.11.10 + runtime.txt + PYTHON_VERSION env
-                       (insuffisant : pydantic-core 2.33.2 n'a pas de wheel cp314)
   - v1.0.0 (build 3) : pydantic 2.12.5 -> pydantic-core 2.41.5 (wheels cp314 OK)
-                       (build passe mais crash au démarrage : SQLAlchemy 2.0.36
-                       casse sur Python 3.14, bug dans typing.py)
   - v1.0.0 (build 4) : SQLAlchemy 2.1.6 (corrige le bug typing.py sur Python 3.14)
+  - v1.0.0 (build 5) : client — sauvegarde l'URL du serveur après login, commande config
+  - v1.0.0 (build 6) : serveur — reverse proxy : try/except détaillé dans forward_request,
+                       handler 500 retourne l'erreur exacte + traceback pour debug,
+                       strip content-length (Starlette le recalcule automatiquement)

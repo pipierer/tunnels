@@ -104,6 +104,30 @@ async def forward_request(
     request: Request,  # noqa: ARG001 — kept for signature parity
 ) -> Response:
     """Forward a visitor request through the tunnel."""
+    try:
+        return await _forward_request_impl(
+            tunnel_id, method, path, query_string, headers, body
+        )
+    except Exception as exc:
+        logger.exception("forward_request crashed for tunnel %s: %s", tunnel_id, exc)
+        return Response(
+            content=(
+                f"Proxy error: {type(exc).__name__}: {exc}\n".encode("utf-8")
+            ),
+            status_code=502,
+            media_type="text/plain",
+        )
+
+
+async def _forward_request_impl(
+    tunnel_id: str,
+    method: str,
+    path: str,
+    query_string: str,
+    headers: dict[str, list[str]],
+    body: bytes,
+) -> Response:
+    """Forward a visitor request through the tunnel (inner implementation)."""
     # 1. Lookup tunnel + owner.
     found = await _lookup_tunnel(tunnel_id)
     if found is None:
@@ -154,13 +178,24 @@ async def forward_request(
     raw_headers = result.get("headers") or {}
     flat = _flatten_headers(raw_headers)
     # Drop hop-by-hop / forbidden headers from the response too.
+    # Also drop content-length (Starlette will recompute it from the body)
+    # and content-encoding (we serve raw decoded bytes).
     flat = [
         (k, v)
         for (k, v) in flat
         if k.lower() not in FORBIDDEN_FORWARD_HEADERS
-        and k.lower() != "content-encoding"  # we serve raw bytes
+        and k.lower() != "content-encoding"
+        and k.lower() != "content-length"
     ]
     body_out: bytes = result.get("body") or b""
+    logger.info(
+        "Tunnel %s: %s %s → %d (%d bytes)",
+        tunnel_id,
+        method,
+        path,
+        status_code,
+        len(body_out),
+    )
     return Response(
         content=body_out,
         status_code=status_code,

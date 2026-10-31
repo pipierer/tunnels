@@ -141,8 +141,15 @@ async def websocket_endpoint(
 @app.exception_handler(500)
 async def _internal_error(request: Request, exc: Exception):  # noqa: ARG001
     logger.exception("Unhandled server error")
+    import traceback
+    tb = traceback.format_exc()
     return JSONResponse(
-        {"detail": "Erreur interne du serveur"}, status_code=500
+        {
+            "detail": "Erreur interne du serveur",
+            "error": f"{type(exc).__name__}: {exc}",
+            "traceback": tb,
+        },
+        status_code=500,
     )
 
 
