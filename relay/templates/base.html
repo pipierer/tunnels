@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}BenTunnel{% endblock %}</title>
+  <meta name="csrf-token" content="{{ request.cookies.get('bentunnel_csrf', '') }}">
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+  <header class="navbar">
+    <div class="navbar-inner">
+      <a href="/" class="brand">
+        <span class="brand-mark">⌬</span>
+        <span class="brand-name">BenTunnel</span>
+      </a>
+      <nav class="nav-links" aria-label="Principal">
+        <a href="/">Accueil</a>
+        {% if user %}
+          <a href="/dashboard">Dashboard</a>
+          {% if user.is_admin %}<a href="/admin">Admin</a>{% endif %}
+          <a href="#" id="logout-link">Déconnexion</a>
+        {% else %}
+          <a href="/login">Connexion</a>
+          <a href="/register" class="btn-primary small">S'inscrire</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <span>BenTunnel · Alternative auto-hébergée à localhost.run</span>
+      <span><a href="/health">/health</a></span>
+    </div>
+  </footer>
+
+  <script>
+    // CSRF helper available to every page.
+    window.BT = {
+      csrfToken: document.querySelector('meta[name="csrf-token"]').content,
+      api: async (url, opts = {}) => {
+        opts.credentials = 'same-origin';
+        opts.headers = opts.headers || {};
+        if (opts.method && opts.method.toUpperCase() !== 'GET') {
+          opts.headers['X-CSRF-Token'] = window.BT.csrfToken;
+        }
+        if (opts.body && typeof opts.body === 'object' && !(opts.body instanceof FormData)) {
+          opts.headers['Content-Type'] = 'application/json';
+          opts.body = JSON.stringify(opts.body);
+        }
+        const r = await fetch(url, opts);
+        let data = null;
+        const ct = r.headers.get('content-type') || '';
+        if (ct.includes('application/json')) data = await r.json();
+        else data = { ok: r.ok, status: r.status, text: await r.text() };
+        if (!r.ok && data && data.detail) throw new Error(data.detail);
+        return { ok: r.ok, status: r.status, data };
+      }
+    };
+    document.getElementById('logout-link')?.addEventListener('click', async (e) => {
+      e.preventDefault();
+      await window.BT.api('/api/auth/logout', { method: 'POST' });
+      window.location.href = '/';
+    });
+  </script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

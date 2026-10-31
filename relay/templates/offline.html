@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tunnel hors ligne — BenTunnel</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body class="offline-page">
+  <main class="offline-card fade-in">
+    <div class="offline-icon" aria-hidden="true">
+      <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"></line>
+      </svg>
+    </div>
+    <h1>Ce tunnel est actuellement hors ligne.</h1>
+    <p>Le client local n'est pas connecté. Demandez au propriétaire de relancer&nbsp;:</p>
+    <pre><code>python -m client.main start</code></pre>
+    <a class="btn-primary" href="/">Retour à l'accueil</a>
+  </main>
+</body>
+</html>

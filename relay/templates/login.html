@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Connexion — BenTunnel{% endblock %}
+
+{% block content %}
+<section class="auth-card fade-in">
+  <h1>Connexion</h1>
+  <p class="muted">Connectez-vous pour gérer votre tunnel.</p>
+
+  <form id="login-form" autocomplete="on" novalidate>
+    <label for="email">Email
+      <input type="email" id="email" name="email" autocomplete="email" required>
+    </label>
+    <label for="password">Mot de passe
+      <input type="password" id="password" name="password" autocomplete="current-password" required>
+    </label>
+    <div id="error" class="error" hidden></div>
+    <button type="submit" class="btn-primary full">Se connecter</button>
+  </form>
+
+  <p class="muted center">Pas encore de compte ? <a href="/register">Créer un compte</a></p>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const form = document.getElementById('login-form');
+  const errEl = document.getElementById('error');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errEl.hidden = true;
+    errEl.textContent = '';
+    const email = form.email.value.trim();
+    const password = form.password.value;
+    try {
+      const { ok, data } = await window.BT.api('/api/auth/login', {
+        method: 'POST',
+        body: { email, password }
+      });
+      if (ok && data && data.redirect) {
+        window.location.href = data.redirect;
+      }
+    } catch (err) {
+      errEl.textContent = err.message || 'Connexion échouée';
+      errEl.hidden = false;
+    }
+  });
+</script>
+{% endblock %}

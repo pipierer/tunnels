@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+{% block title %}Inscription — BenTunnel{% endblock %}
+
+{% block content %}
+<section class="auth-card fade-in">
+  <h1>Créer un compte</h1>
+  <p class="muted">Une URL publique vous est réservée automatiquement.</p>
+
+  <form id="register-form" autocomplete="on" novalidate>
+    <label for="first_name">Prénom
+      <input type="text" id="first_name" name="first_name" autocomplete="given-name" maxlength="64" required>
+    </label>
+    <label for="email">Email
+      <input type="email" id="email" name="email" autocomplete="email" required>
+    </label>
+    <label for="password">Mot de passe
+      <input type="password" id="password" name="password" autocomplete="new-password" minlength="8" required>
+      <small class="hint">8 caractères minimum.</small>
+    </label>
+    <label for="confirm_password">Confirmez le mot de passe
+      <input type="password" id="confirm_password" name="confirm_password" autocomplete="new-password" minlength="8" required>
+    </label>
+    <div id="error" class="error" hidden></div>
+    <button type="submit" class="btn-primary full">Créer mon compte</button>
+  </form>
+
+  <p class="muted center">Déjà inscrit ? <a href="/login">Se connecter</a></p>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  const form = document.getElementById('register-form');
+  const errEl = document.getElementById('error');
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    errEl.hidden = true;
+    errEl.textContent = '';
+    if (form.password.value !== form.confirm_password.value) {
+      errEl.textContent = 'Les mots de passe ne correspondent pas';
+      errEl.hidden = false;
+      return;
+    }
+    try {
+      const { ok, data } = await window.BT.api('/api/auth/register', {
+        method: 'POST',
+        body: {
+          first_name: form.first_name.value.trim(),
+          email: form.email.value.trim(),
+          password: form.password.value
+        }
+      });
+      if (ok && data && data.redirect) {
+        window.location.href = data.redirect;
+      }
+    } catch (err) {
+      errEl.textContent = err.message || 'Inscription échouée';
+      errEl.hidden = false;
+    }
+  });
+</script>
+{% endblock %}

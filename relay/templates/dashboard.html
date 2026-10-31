@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Dashboard — BenTunnel{% endblock %}
+
+{% block content %}
+<section class="dashboard fade-in">
+  <header class="dashboard-head">
+    <h1>Bonjour, {{ user.first_name }} 👋</h1>
+    <div class="status-badge" id="status-badge" data-status="offline">
+      <span class="dot"></span>
+      <span class="label">Hors ligne</span>
+    </div>
+  </header>
+
+  <div class="card-grid">
+    <article class="card">
+      <h3>URL publique</h3>
+      <div class="url-row">
+        <code id="public-url">—</code>
+        <button id="copy-url" class="btn-secondary small" type="button">Copier</button>
+      </div>
+      <p class="muted small">Partagez cette URL. Tout le trafic est reversé vers <code>127.0.0.1:&lt;port&gt;</code> via le client.</p>
+    </article>
+
+    <article class="card">
+      <h3>Port local</h3>
+      <div class="big-value" id="local-port">—</div>
+      <p class="muted small">Le port que le client forward vers 127.0.0.1.</p>
+    </article>
+
+    <article class="card">
+      <h3>Dernière connexion</h3>
+      <div class="big-value" id="last-seen">—</div>
+      <p class="muted small">Dernier PONG reçu du client.</p>
+    </article>
+  </div>
+
+  <section class="card">
+    <h3>Démarrer le tunnel</h3>
+    <p class="muted">Le tunnel se contrôle depuis votre terminal. Le bouton « Démarrer » ci-dessous copie simplement la commande à lancer.</p>
+    <div class="cli-block">
+      <pre id="start-cmd"><code># Installez le client (une fois)
+pip install bentunnel-client
+
+# Démarrez le tunnel vers votre port local
+python -m client.main start --port 3000</code></pre>
+      <button class="btn-secondary small" id="copy-start" type="button">Copier</button>
+    </div>
+    <div class="cli-block">
+      <pre id="stop-cmd"><code># Pour stopper : Ctrl+C dans le terminal du client</code></pre>
+    </div>
+    <div class="btn-row">
+      <button class="btn-primary" id="btn-start" type="button">Démarrer le tunnel</button>
+      <button class="btn-secondary" id="btn-stop" type="button">Stopper le tunnel</button>
+    </div>
+    <p class="muted small" id="tunnel-token-hint" hidden>Token WS prêt : <code id="tunnel-token"></code></p>
+  </section>
+
+  <section class="card">
+    <h3>Documentation</h3>
+    <ul class="docs-list">
+      <li>Le client maintient une WebSocket ouverte vers <code id="ws-url">/ws</code>.</li>
+      <li>Le serveur envoie un <code>PING</code> toutes les 30 s — le client doit répondre <code>PONG</code> sous 10 s.</li>
+      <li>Le token JWT expire en 5 min. Le client le renouvelle automatiquement.</li>
+      <li>Limite : 5 Mo par requête/réponse. Timeout : 30 s.</li>
+    </ul>
+  </section>
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/dashboard.js" defer></script>
+{% endblock %}

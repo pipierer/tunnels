@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% block title %}Admin — BenTunnel{% endblock %}
+
+{% block content %}
+<section class="admin fade-in">
+  <header class="admin-head">
+    <h1>Panneau d'administration</h1>
+    <p class="muted">Gérez les utilisateurs, les tunnels et consultez les logs.</p>
+  </header>
+
+  <nav class="tabs" aria-label="Sections admin">
+    <button class="tab active" data-tab="users">Utilisateurs</button>
+    <button class="tab" data-tab="tunnels">Tunnels</button>
+    <button class="tab" data-tab="audit">Audit</button>
+  </nav>
+
+  <section id="tab-users" class="tab-panel active">
+    <div class="table-wrap">
+      <table id="users-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>Email</th><th>Prénom</th><th>Rôle</th><th>Statut</th>
+            <th>Tunnel</th><th>Dernier seen</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="tab-tunnels" class="tab-panel">
+    <div class="table-wrap">
+      <table id="tunnels-table">
+        <thead>
+          <tr>
+            <th>Tunnel ID</th><th>Propriétaire</th><th>Port local</th>
+            <th>Statut</th><th>Dernier seen</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section id="tab-audit" class="tab-panel">
+    <div class="table-wrap">
+      <table id="audit-table">
+        <thead>
+          <tr>
+            <th>ID</th><th>Date</th><th>User ID</th><th>Action</th><th>IP</th><th>Détails</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p class="muted small">200 entrées les plus récentes.</p>
+  </section>
+</section>
+
+<div id="modal" class="modal" hidden>
+  <div class="modal-content">
+    <h3 id="modal-title">Confirmation</h3>
+    <p id="modal-body"></p>
+    <div class="modal-actions">
+      <button class="btn-secondary" id="modal-cancel">Annuler</button>
+      <button class="btn-primary" id="modal-confirm">Confirmer</button>
+    </div>
+    <div id="modal-result" class="muted small" hidden></div>
+  </div>
+</div>
+
+<script src="/static/js/admin.js" defer></script>
+{% endblock %}

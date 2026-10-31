@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block title %}BenTunnel — Exposez votre localhost au monde{% endblock %}
+
+{% block content %}
+<section class="hero fade-in">
+  <h1>Exposez votre <span class="accent">localhost</span> au monde</h1>
+  <p class="lead">BenTunnel vous donne une URL publique en HTTPS qui pointe vers votre serveur local.
+    Pas de firewall, pas de routeur, pas de DynDNS. Un client Python, une URL.</p>
+  <div class="cta-row">
+    <a href="/register" class="btn-primary">Créer un compte</a>
+    <a href="/login" class="btn-secondary">Se connecter</a>
+  </div>
+</section>
+
+<section class="steps fade-in">
+  <h2>Comment ça marche</h2>
+  <div class="steps-grid">
+    <article class="step-card">
+      <div class="step-num">1</div>
+      <h3>Créez votre compte</h3>
+      <p>Inscrivez-vous en 10 secondes. Une URL <code>/tunnels/&lt;votre-slug&gt;</code> vous est réservée.</p>
+    </article>
+    <article class="step-card">
+      <div class="step-num">2</div>
+      <h3>Lancez le client</h3>
+      <p>Le client Python ouvre une WebSocket vers le serveur Render et maintient la connexion ouverte.</p>
+    </article>
+    <article class="step-card">
+      <div class="step-num">3</div>
+      <h3>Partagez votre URL</h3>
+      <p>Tout le trafic arriving sur votre URL publique est reversé vers <code>127.0.0.1:&lt;port&gt;</code>.</p>
+    </article>
+  </div>
+</section>
+
+<section class="code-block fade-in">
+  <h2>Démarrage rapide</h2>
+<pre><code># 1. Installez le client
+pip install bentunnel-client
+
+# 2. Connectez-vous (une fois)
+python -m client.main login --email vous@example.com
+
+# 3. Exposez votre port local
+python -m client.main start --port 3000
+
+# → Votre app est désormais disponible sur
+#   {{ public_base_url }}/tunnels/&lt;votre-slug&gt;
+</code></pre>
+</section>
+
+<section class="features fade-in">
+  <h2>Caractéristiques</h2>
+  <ul class="features-list">
+    <li>🔒 HTTPS automatique sur toutes les URLs publiques</li>
+    <li>⚡ Authentification par JWT court (5 min) renouvelable</li>
+    <li>🛡️ Mots de passe Argon2id, sessions révocables, CSRF double-submit</li>
+    <li>🌐 Multi-méthode : GET, POST, PUT, PATCH, DELETE, OPTIONS</li>
+    <li>📦 Corps binaires jusqu'à 5 Mo (tunneling d'uploads, images, etc.)</li>
+    <li>❤️ Keep-alive automatique (PING/PONG) — Render Free reste réveillé</li>
+  </ul>
+</section>
+{% endblock %}

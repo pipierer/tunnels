@@ -1,0 +1,26 @@
+services:
+  - type: web
+    name: bentunnel
+    runtime: python
+    plan: free
+    buildCommand: pip install -r relay/requirements.txt
+    startCommand: uvicorn relay.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      # IMPORTANT : on pinne Python à 3.12 car pydantic-core 2.27.2 (dépendance
+      # de pydantic 2.10.4) n'a pas de wheel pour Python 3.14, et Render a un
+      # cache cargo en lecture seule qui empêche de compiler depuis les sources.
+      # Le fichier runtime.txt à la racine du repo est aussi lu par Render.
+      - key: PYTHON_VERSION
+        value: "3.12.7"
+      - key: DATABASE_URL
+        sync: false
+      - key: BEN_TUNNEL_SECRET
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: ADMIN_BOOTSTRAP_PASSWORD
+        sync: false
+      - key: ADMIN_BOOTSTRAP_FIRST_NAME
+        value: Admin
+      - key: PUBLIC_BASE_URL
+        value: https://bentunnel.onrender.com
