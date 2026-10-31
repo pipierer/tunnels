@@ -64,15 +64,46 @@ def _strip_headers(raw_headers) -> dict[str, list[str]]:
     return out
 
 
-def _flatten_headers(headers: dict[str, Any]) -> list[tuple[str, str]]:
-    """Flatten {name: [v1, v2]} → [(name, v1), (name, v2)] for Starlette."""
+def _flatten_headers(headers) -> list[tuple[str, str]]:
+    """Flatten headers into a list of (name, value) tuples for Starlette.
+
+    Accepts multiple wire formats defensively:
+    - ``{name: [v1, v2]}`` (canonical, sent by BenTunnel client)
+    - ``{name: v1}`` (single-value dict)
+    - ``[(name, v1), (name, v2)]`` (list of tuples, e.g. Starlette raw)
+    - ``[(b"name", b"v1")]`` (bytes variant)
+    """
     flat: list[tuple[str, str]] = []
-    for name, values in headers.items():
-        if isinstance(values, (list, tuple)):
-            for v in values:
-                flat.append((name, str(v)))
-        else:
-            flat.append((name, str(values)))
+    if headers is None:
+        return flat
+
+    # Case 1: dict-like (has .items())
+    if hasattr(headers, "items"):
+        for name, values in headers.items():
+            if values is None:
+                continue
+            if isinstance(values, (list, tuple)):
+                for v in values:
+                    flat.append((str(name), str(v)))
+            else:
+                flat.append((str(name), str(values)))
+        return flat
+
+    # Case 2: iterable of (name, value) tuples (possibly bytes)
+    try:
+        for pair in headers:
+            if not isinstance(pair, (list, tuple)) or len(pair) != 2:
+                continue
+            name, value = pair
+            if name is None or value is None:
+                continue
+            if isinstance(name, (bytes, bytearray)):
+                name = name.decode("latin-1")
+            if isinstance(value, (bytes, bytearray)):
+                value = value.decode("latin-1")
+            flat.append((str(name), str(value)))
+    except TypeError:
+        logger.warning("Unexpected headers format: %r", type(headers))
     return flat
 
 
@@ -176,6 +207,14 @@ async def _forward_request_impl(
 
     status_code = int(result.get("status_code", 502))
     raw_headers = result.get("headers") or {}
+    # Debug : logger le type exact pour diagnostiquer les problèmes de format.
+    logger.debug(
+        "Tunnel %s response: status=%d, headers_type=%s, headers=%r",
+        tunnel_id,
+        status_code,
+        type(raw_headers).__name__,
+        raw_headers,
+    )
     flat = _flatten_headers(raw_headers)
     # Drop hop-by-hop / forbidden headers from the response too.
     # Also drop content-length (Starlette will recompute it from the body)

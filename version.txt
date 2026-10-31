@@ -1,6 +1,6 @@
 BenTunnel v1.0.0
 
-Build : 6
+Build : 7
 Date  : 2026-10-31
 Python: 3.10+ (testé sur 3.12 et 3.14)
 
@@ -10,6 +10,9 @@ Changelog :
   - v1.0.0 (build 3) : pydantic 2.12.5 -> pydantic-core 2.41.5 (wheels cp314 OK)
   - v1.0.0 (build 4) : SQLAlchemy 2.1.6 (corrige le bug typing.py sur Python 3.14)
   - v1.0.0 (build 5) : client — sauvegarde l'URL du serveur après login, commande config
-  - v1.0.0 (build 6) : serveur — reverse proxy : try/except détaillé dans forward_request,
-                       handler 500 retourne l'erreur exacte + traceback pour debug,
-                       strip content-length (Starlette le recalcule automatiquement)
+  - v1.0.0 (build 6) : serveur — reverse proxy : try/except détaillé, handler 500 détaillé,
+                       strip content-length
+  - v1.0.0 (build 7) : serveur — _flatten_headers défensif : gère dict de listes,
+                       dict de strings, liste de tuples, liste de tuples bytes.
+                       Corrige l'erreur "AttributeError: 'list' object has no attribute 'items'"
+                       quand le client envoie les headers de réponse dans un format inattendu.
